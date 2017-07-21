@@ -11,6 +11,7 @@ type JSONStream struct {
 	buffer []byte
 
 	// ha en stack av vad som är öppet?
+	currentScopeIsEmpty bool
 }
 
 func NewJSONStream(cb func(data []byte)) *JSONStream {
@@ -20,11 +21,20 @@ func NewJSONStream(cb func(data []byte)) *JSONStream {
 }
 
 func (p *JSONStream) OpenObject() {
+	p.currentScopeIsEmpty = true
 	p.buffer[p.front] = '{'
 	p.front++
 }
 
 func (p *JSONStream) PutKey(key []byte) {
+
+	// put comma if this scope is not empty!
+	if !p.currentScopeIsEmpty {
+		p.buffer[p.front] = ','
+		p.front++
+	}
+	p.currentScopeIsEmpty = false
+
 	p.buffer[p.front] = '"'
 	p.front++
 	copy(p.buffer[p.front:], key)
@@ -41,9 +51,24 @@ func (p *JSONStream) PutInt(value int) {
 	p.front += len(byteRep)
 }
 
+func (p *JSONStream) PutString(value []byte) {
+	p.buffer[p.front] = '"'
+	p.front++
+	copy(p.buffer[p.front:], value)
+	p.front += len(value)
+	p.buffer[p.front] = '"'
+	p.front++
+}
+
 func (p *JSONStream) CloseObject() {
+	p.currentScopeIsEmpty = false
 	p.buffer[p.front] = '}'
 	p.front++
+}
+
+func (p *JSONStream) Reset() {
+	p.front = 0
+	p.OpenObject()
 }
 
 func (p *JSONStream) End() {

@@ -31,3 +31,22 @@ SuperCereal is a simple and efficient JSON serializing library for Go. Unlike ma
 }
 
 ```
+
+### Benchmarks
+The following JSON was generated using multiple `map[string]interface{}` + `json.Marshal` in 6 µs:
+```go
+{
+	"attributes": {
+		"key": {
+			"jaja": "hellå",
+			"recursive": "hallåja"
+		},
+		"key2": {
+			"jaja2": "hellå2",
+			"recursive2": "hallåja2"
+		}
+	},
+	"revision": 12
+}
+```
+The same JSON was generated using SuperCereal in 0.3 µs, some 20x as fast. The bigger the JSON (esp. depth), the bigger the performance difference.
