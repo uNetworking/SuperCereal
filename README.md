@@ -1,6 +1,6 @@
 <div align="center"><img src="al.jpg" /></div>
 
-SuperCereal is a simple and efficient JSON serializing library for Go. Unlike many other "fast" serializers, it doesn't make use of intermediate (hash) maps or "documents". Instead it immediately dumps to a pre-allocated buffer, whatever data you add as you add it. JSON is emitted in chunks of bytes in a streaming fashion. Because of this SuperCereal runs a lot faster and with way less memory usage compared to solutions with intermediate documents (such as RapidJSON).
+SuperCereal is a simple and efficient JSON serialization library for Go. Unlike most other serializers it doesn't operate using an intermediary tree data structure (think "DOM") but instead exposes a set of simple fuction calls to directly control the JSON generation (a la "SAX"). This makes for a very lightweight and efficient JSON serialization process where most execution paths incur no memory allocations.
 
 ### Overview
 ```go
@@ -26,7 +26,9 @@ SuperCereal is a simple and efficient JSON serializing library for Go. Unlike ma
 ```
 
 ### Benchmarks
-The following JSON was generated using multiple `map[string]interface{}` + `json.Marshal` in 12.987583 µs:
+The Go standard library call `json.Marshal` expects an `interface{}` which is to represent the root of an intermediary tree data structure. This means you need to allocate nodes, populate these nodes and finally traverse them all in order to generate JSON output. This my friend, this is madness.
+
+The following JSON was generated in about 25x less time using SuperCereal, as compared to `json.Marshal`:
 ```go
 {
 	"firstName": "John",
@@ -53,4 +55,3 @@ The following JSON was generated using multiple `map[string]interface{}` + `json
 	"spouse": null
 }
 ```
-The same JSON was generated using SuperCereal in 0.485641 µs, some 25x as fast. The bigger the JSON (esp. depth), the bigger the performance difference.
