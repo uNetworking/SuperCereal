@@ -93,6 +93,56 @@ func benchmarkSuperCereal() {
 		js.PutNull()
 	}
 
+	fmt.Printf("\n\nSerialization took %f µs\n", time.Since(start).Seconds())
+	js.End()
+}
+
+func benchmarkSuperCerealSimple() {
+	js := supercereal.NewJSONStream(func(data []byte) {
+		fmt.Print(string(data))
+	})
+
+	start := time.Now()
+	for i := 0; i < 1000000; i++ {
+
+		// reset kan vara den enda funktionen i rooten
+		// som ger dig antingen en array eller ett object!
+		// då tas även End bort!
+		js.Reset()
+
+		js.Put("firstName", "John")
+		js.Put("lastName", "Smith")
+		js.Put("isAlive", true)
+		js.Put("age", 25)
+
+		js.Put("address", func(object supercereal.JSONObject) {
+			object.Put("streetAddress", "21 2nd Street")
+			object.Put("city", "New York")
+			object.Put("state", "NY")
+			object.Put("postalCode", "10021-3100")
+		})
+
+		js.Put("phoneNumbers", func(array supercereal.JSONArray) {
+			array.Put(func(object supercereal.JSONObject) {
+				object.Put("type", "home")
+				object.Put("number", "212 555-1234")
+			})
+			array.Put(func(object supercereal.JSONObject) {
+				object.Put("type", "office")
+				object.Put("number", "646 555-4567")
+			})
+			array.Put(func(object supercereal.JSONObject) {
+				object.Put("type", "mobile")
+				object.Put("number", "123 456-7890")
+			})
+		})
+
+		js.Put("children", func(array supercereal.JSONArray) {
+		})
+
+		js.Put("spouse", nil)
+	}
+
 	fmt.Printf("Serialization took %f µs\n", time.Since(start).Seconds())
 	js.End()
 }
@@ -140,6 +190,7 @@ func benchmarkJSONMarshal() {
 }
 
 func main() {
-	benchmarkSuperCereal()
-	benchmarkJSONMarshal()
+	benchmarkSuperCerealSimple() // high level interface
+	benchmarkSuperCereal()       // low level interface
+	//benchmarkJSONMarshal()
 }

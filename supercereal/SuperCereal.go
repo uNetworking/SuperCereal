@@ -132,3 +132,94 @@ func (p *JSONStream) End() {
 	p.CloseObject()
 	p.cb(p.buffer[:p.front])
 }
+
+///////////////////////////////////// HELPERS HERE
+
+// JSONArray
+
+type JSONArray struct {
+	js *JSONStream
+}
+
+type JSONObject struct {
+	js *JSONStream
+}
+
+func (p *JSONStream) Put(key string, value interface{}) {
+	p.PutKey([]byte(key))
+
+	switch v := value.(type) {
+	case string:
+		p.PutString([]byte(v))
+	case int:
+		p.PutInt(v)
+	case bool:
+		p.PutBoolean(v)
+	case func(array JSONArray):
+		p.OpenArray()
+		v(JSONArray{js: p})
+		p.CloseArray()
+	case func(object JSONObject):
+		p.OpenObject()
+		v(JSONObject{js: p})
+		p.CloseObject()
+	default:
+		p.PutNull()
+	}
+}
+
+func (p *JSONStream) PutObject(key string, cb func()) {
+	p.PutKey([]byte(key))
+	p.OpenObject()
+	cb()
+	p.CloseObject()
+}
+
+func (p *JSONObject) PutObject(key string, cb func()) {
+	p.js.PutKey([]byte(key))
+	p.js.OpenObject()
+	cb()
+	p.js.CloseObject()
+}
+
+func (p *JSONArray) Put(value interface{}) {
+	switch v := value.(type) {
+	case string:
+		p.js.PutString([]byte(v))
+	case int:
+		p.js.PutInt(v)
+	case bool:
+		p.js.PutBoolean(v)
+	case func(array JSONArray):
+		p.js.OpenArray()
+		v(JSONArray{js: p.js})
+		p.js.CloseArray()
+	case func(object JSONObject):
+		p.js.OpenObject()
+		v(JSONObject{js: p.js})
+		p.js.CloseObject()
+	}
+}
+
+func (p *JSONObject) Put(key string, value interface{}) {
+	p.js.PutKey([]byte(key))
+
+	switch v := value.(type) {
+	case string:
+		p.js.PutString([]byte(v))
+	case int:
+		p.js.PutInt(v)
+	case bool:
+		p.js.PutBoolean(v)
+	case func(array JSONArray):
+		p.js.PutKey([]byte(key))
+		p.js.OpenArray()
+		v(JSONArray{js: p.js})
+		p.js.CloseArray()
+	case func(object JSONObject):
+		p.js.PutKey([]byte(key))
+		p.js.OpenObject()
+		v(JSONObject{js: p.js})
+		p.js.CloseObject()
+	}
+}
