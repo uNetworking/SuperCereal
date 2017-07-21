@@ -1,6 +1,7 @@
+
 <div align="center"><img src="al.jpg" /></div>
 
-SuperCereal is a simple and efficient JSON serialization library for Go. Unlike most other serializers it doesn't operate using an intermediary tree data structure (think "DOM") but instead exposes a set of simple fuction calls to directly control the JSON generation (a la "SAX"). This makes for a very lightweight and efficient JSON serialization process where most execution paths incur no memory allocations.
+**SuperCereal** is a simple and efficient JSON serialization library for Go. Unlike most other serializers it doesn't operate using an intermediary tree data structure (think "DOM") but instead exposes a set of simple fuction calls to directly control the JSON generation (a la "SAX"). This makes for a very lightweight and efficient JSON serialization process where most execution paths incur no memory allocations.
 
 ### Simple
 With an object oriented & generic design it takes only a few lines to generate JSON:
@@ -71,3 +72,6 @@ The following JSON was generated in about 25x less time using SuperCereal, as co
 	"spouse": null
 }
 ```
+
+### Open
+Licensed Zlib © 2017
