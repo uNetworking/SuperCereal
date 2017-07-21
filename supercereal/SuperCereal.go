@@ -28,12 +28,6 @@ func (p *JSONStream) OpenArray() {
 	p.front++
 }
 
-func (p *JSONStream) CloseArray() {
-	p.currentScopeIsEmpty = true
-	p.buffer[p.front] = ']'
-	p.front++
-}
-
 // Root or Value depends on if lastWasKey
 func (p *JSONStream) OpenObject() {
 	// put comma if this scope is not empty and last was not key
@@ -45,6 +39,22 @@ func (p *JSONStream) OpenObject() {
 	p.currentScopeIsEmpty = true
 	p.buffer[p.front] = '{'
 	p.front++
+}
+
+func (p *JSONStream) CloseArray() {
+	p.buffer[p.front] = ']'
+	p.front++
+
+	p.lastWasKey = false
+	p.currentScopeIsEmpty = false
+}
+
+func (p *JSONStream) CloseObject() {
+	p.buffer[p.front] = '}'
+	p.front++
+
+	p.lastWasKey = false
+	p.currentScopeIsEmpty = false
 }
 
 // Key only
@@ -79,6 +89,27 @@ func (p *JSONStream) PutInt(value int) {
 }
 
 // Value only
+func (p *JSONStream) PutNull() {
+	p.lastWasKey = false
+
+	byteRep := []byte("null")
+	copy(p.buffer[p.front:], byteRep)
+	p.front += len(byteRep)
+}
+
+// Value only
+func (p *JSONStream) PutBoolean(value bool) {
+	p.lastWasKey = false
+
+	byteRep := "false"
+	if value {
+		byteRep = "true"
+	}
+	copy(p.buffer[p.front:], byteRep)
+	p.front += len(byteRep)
+}
+
+// Value only
 func (p *JSONStream) PutString(value []byte) {
 	p.lastWasKey = false
 
@@ -87,12 +118,6 @@ func (p *JSONStream) PutString(value []byte) {
 	copy(p.buffer[p.front:], value)
 	p.front += len(value)
 	p.buffer[p.front] = '"'
-	p.front++
-}
-
-func (p *JSONStream) CloseObject() {
-	p.currentScopeIsEmpty = false
-	p.buffer[p.front] = '}'
 	p.front++
 }
 

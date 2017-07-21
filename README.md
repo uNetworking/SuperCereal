@@ -1,6 +1,6 @@
 <div align="center"><img src="al.jpg" /></div>
 
-SuperCereal is a simple and efficient JSON serializing library for Go. Unlike many other "fast" serializers, it doesn't make use of intermediate (hash) maps or "documents". Instead it immediately dumps to a pre-allocated buffer, whatever data you add as you add it. JSON is emitted in chunks of data as the pre-allocated buffer fills up.
+SuperCereal is a simple and efficient JSON serializing library for Go. Unlike many other "fast" serializers, it doesn't make use of intermediate (hash) maps or "documents". Instead it immediately dumps to a pre-allocated buffer, whatever data you add as you add it. JSON is emitted in chunks of bytes in a streaming fashion. Because of this SuperCereal runs a lot faster and with way less memory usage compared to solutions with intermediate documents (such as RapidJSON).
 
 ### Overview
 ```go
@@ -11,42 +11,46 @@ SuperCereal is a simple and efficient JSON serializing library for Go. Unlike ma
 	})
 
 	// "stream" JSON data in, directly from whatever original format you use
-	js.PutKey([]byte("revision"))
-	js.PutInt(12)
-	js.PutKey([]byte("attributes"))
-	js.OpenObject()
-	js.PutKey([]byte("key"))
-	js.PutInt(13)
-	js.CloseObject()
+	js.PutKey([]byte("firstName"))
+	js.PutString([]byte("John"))
+
+	js.PutKey([]byte("lastName"))
+	js.PutString([]byte("Smith"))
+
+	js.PutKey([]byte("isAlive"))
+	js.PutBoolean(true)
+
+	js.PutKey([]byte("age"))
+	js.PutInt(25)
 	js.End()
 ```
 
-### Output
-```json
-{
-	"revision": 12,
-	"attributes": {
-		"key": 13
-	}
-}
-
-```
-
 ### Benchmarks
-The following JSON was generated using multiple `map[string]interface{}` + `json.Marshal` in 6 µs:
+The following JSON was generated using multiple `map[string]interface{}` + `json.Marshal` in 12.987583 µs:
 ```go
 {
-	"attributes": {
-		"key": {
-			"jaja": "hellå",
-			"recursive": "hallåja"
-		},
-		"key2": {
-			"jaja2": "hellå2",
-			"recursive2": "hallåja2"
-		}
+	"firstName": "John",
+	"lastName": "Smith",
+	"isAlive": true,
+	"age": 25,
+	"address": {
+		"streetAddress": "21 2nd Street",
+		"city": "New York",
+		"state": "NY",
+		"postalCode": "10021-3100"
 	},
-	"revision": 12
+	"phoneNumbers": [{
+		"type": "home",
+		"number": "212 555-1234"
+	}, {
+		"type": "office",
+		"number": "646 555-4567"
+	}, {
+		"type": "mobile",
+		"number": "123 456-7890"
+	}],
+	"children": [],
+	"spouse": null
 }
 ```
-The same JSON was generated using SuperCereal in 0.3 µs, some 20x as fast. The bigger the JSON (esp. depth), the bigger the performance difference.
+The same JSON was generated using SuperCereal in 0.485641 µs, some 25x as fast. The bigger the JSON (esp. depth), the bigger the performance difference.
