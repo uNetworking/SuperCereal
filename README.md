@@ -48,7 +48,7 @@ js.Serialize(func(object *supercereal.JSONObject) {
 })
 ```
 #### Efficient
-SuperCereal outperforms `json.Marshal` by about 25x in time:
+SuperCereal outperforms Go's `json.Marshal` by ~25x and V8's `JSON.stringify` by ~5x in time:
 ![](benchmark.png)
 
 #### Open

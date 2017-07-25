@@ -149,38 +149,34 @@ func benchmarkJSONMarshal() {
 	start := time.Now()
 	var bytes []byte
 	for i := 0; i < 1000000; i++ {
-		root := make(map[string]interface{}, 0)
-		root["firstName"] = "John"
-		root["lastName"] = "Smith"
-		root["isAlive"] = true
-		root["age"] = 25
-
-		address := make(map[string]interface{}, 0)
-		address["streetAddress"] = "21 2nd Street"
-		address["city"] = "New York"
-		address["state"] = "NY"
-		address["postalCode"] = "10021-3100"
-
-		root["address"] = address
-
-		phoneNumbers := make([]map[string]interface{}, 3)
-		phoneNumbers[0] = make(map[string]interface{}, 0)
-		phoneNumbers[0]["type"] = "home"
-		phoneNumbers[0]["number"] = "212 555-1234"
-
-		phoneNumbers[1] = make(map[string]interface{}, 0)
-		phoneNumbers[1]["type"] = "office"
-		phoneNumbers[1]["number"] = "646 555-4567"
-
-		phoneNumbers[2] = make(map[string]interface{}, 0)
-		phoneNumbers[2]["type"] = "mobile"
-		phoneNumbers[2]["number"] = "123 456-7890"
-
-		root["phoneNumbers"] = phoneNumbers
-		root["children"] = make([]map[string]interface{}, 0)
-		root["spouse"] = nil
-
-		bytes, _ = json.Marshal(root)
+		bytes, _ = json.Marshal(map[string]interface{}{
+			"firstName": "John",
+			"lastName":  "Smith",
+			"isAlive":   true,
+			"age":       25,
+			"address": map[string]interface{}{
+				"streetAddress": "21 2nd Street",
+				"city":          "New York",
+				"state":         "NY",
+				"postalCode":    "10021-3100",
+			},
+			"phoneNumbers": []interface{}{
+				map[string]interface{}{
+					"type":   "home",
+					"number": "212 555-1234",
+				},
+				map[string]interface{}{
+					"type":   "office",
+					"number": "646 555-4567",
+				},
+				map[string]interface{}{
+					"type":   "mobile",
+					"number": "123 456-7890",
+				},
+			},
+			"children": []interface{}{},
+			"spouse":   nil,
+		})
 	}
 
 	fmt.Printf("benchmarkJSONMarshal took %f µs\n", time.Since(start).Seconds())
