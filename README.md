@@ -1,10 +1,8 @@
-
 <div align="center"><img src="al.jpg" /></div>
 
-`SuperCereal` is a simple and efficient JSON serialization library for Go. Unlike most other serializers it doesn't operate using an intermediary tree data structure (think "DOM"). This allows for a very lightweight and efficient JSON serialization process without any memory allocations in hot execution paths.
+`SuperCereal` is a simple and efficient JSON serialization library for Go. Unlike most other serializers, including standard `json.Marshal`, it doesn't operate using an intermediary tree data structure (`map[string]interface{}`). This makes it a lot more efficient in both time and memory.
 
 #### Simple
-With an object oriented & generic design it only takes a few lines to generate JSON:
 ```go
 // Allocates memory, keep it alive and reuse it for many serializations!
 js := supercereal.NewJSONStream()
@@ -49,12 +47,9 @@ js.Serialize(func(object *supercereal.JSONObject) {
 	object.Put("spouse", nil)
 })
 ```
-
-Above sample prints: `{"firstName":"John","lastName":"Smith","isAlive":true,"age":25,"address":{"streetAddress":"21 2nd Street","city":"New York","state":"NY","postalCode":"10021-3100"},"phoneNumbers":[{"type":"home","number":"212 555-1234"},{"type":"office","number":"646 555-4567"},{"type":"mobile","number":"123 456-7890"}],"children":[],"spouse":null}`
-
-
 #### Efficient
-The Go standard library call `json.Marshal` expects a tree data structure (something like a `map[interface{}]interface{}`) holding a complete copy of the data you want to serialize. By skipping the allocation, population, traversal and deallocation of this tree, SuperCereal outperforms `json.Marshal` by **25x in CPU time**. It also completely skips garbage collection overhead by avoiding costly memory allocations and deallocations in the hot execution path. Test data and benchmarks are openly available in `main.go` for easy validation.
+SuperCereal outperforms `json.Marshal` by about 25x in time:
+![](benchmark.png)
 
 #### Open
 Licensed Zlib © 2017
