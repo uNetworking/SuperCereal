@@ -1,6 +1,6 @@
 <div align="center"><img src="al.jpg" /></div>
 
-`SuperCereal` is a simple and efficient JSON serialization library for Go. Unlike most other serializers, including standard `json.Marshal` and JavaScript's `JSON.stringify`, it doesn't operate using an intermediary tree data structure (`map[string]interface{}` or JavaScript `Object`). This makes it a lot more efficient in both time and memory.
+`SuperCereal` is a simple and efficient JSON serialization library for Go. Unlike most other serializers, including Go's `json.Marshal` and JavaScript's `JSON.stringify`, it doesn't operate using an intermediary tree data structure. This makes it significantly more efficient in both time and memory.
 
 #### Simple
 ```go
