@@ -110,8 +110,47 @@ func (p *JSONStream) PutString(value []byte) {
 
 	p.buffer[p.front] = '"'
 	p.front++
-	copy(p.buffer[p.front:], value)
-	p.front += len(value)
+	//copy(p.buffer[p.front:], value)
+	//p.front += len(value)
+
+	for i := 0; i < len(value); i++ {
+		if value[i] != '\\' && (value[i] > '"' || value[i] == ' ') {
+			p.buffer[p.front] = value[i]
+			p.front++
+		} else if value[i] == '"' {
+			p.buffer[p.front] = '\\'
+			p.buffer[p.front+1] = '"'
+			p.front += 2
+		} else if value[i] == '\\' {
+			p.buffer[p.front] = '\\'
+			p.buffer[p.front+1] = '\\'
+			p.front += 2
+		} else if value[i] == '\n' {
+			p.buffer[p.front] = '\\'
+			p.buffer[p.front+1] = 'n'
+			p.front += 2
+		} else if value[i] == '\r' {
+			p.buffer[p.front] = '\\'
+			p.buffer[p.front+1] = 'r'
+			p.front += 2
+		} else if value[i] == '\t' {
+			p.buffer[p.front] = '\\'
+			p.buffer[p.front+1] = 't'
+			p.front += 2
+		} else if value[i] == '\f' {
+			p.buffer[p.front] = '\\'
+			p.buffer[p.front+1] = 'f'
+			p.front += 2
+		} else if value[i] == '\b' {
+			p.buffer[p.front] = '\\'
+			p.buffer[p.front+1] = 'b'
+			p.front += 2
+		} else {
+			p.buffer[p.front] = value[i]
+			p.front++
+		}
+	}
+
 	p.buffer[p.front] = '"'
 	p.front++
 }
