@@ -14,7 +14,7 @@ type JSONStream struct {
 }
 
 func NewJSONStream() *JSONStream {
-	js := &JSONStream{buffer: make([]byte, 1024*1024)} // 1mb buffer by default
+	js := &JSONStream{buffer: make([]byte, 1024*1024*10)} // 1mb buffer by default
 	js.Reset()
 	return js
 }
