@@ -2,18 +2,11 @@
 
 `SuperCereal` is a simple and efficient JSON serialization library for Go. Unlike most other serializers, including Go's `json.Marshal` and JavaScript's `JSON.stringify`, it doesn't operate using an intermediary tree data structure. This makes it significantly more efficient in both time and memory.
 
+* `supercereal.Marshal` outperforms Go's `json.Marshal` by ~25x and V8's `JSON.stringify` by ~5x in time.
+
 #### Simple
 ```go
-// Allocates memory, keep it alive and reuse it for many serializations!
-js := supercereal.NewJSONStream()
-
-// Register a callback to receive json output in (potentially) chunks of bytes.
-js.OnJSON(func(json []byte) {
-	fmt.Println(string(json))
-})
-
-// Perform the actual serialization of your data.
-js.Serialize(func(object *supercereal.JSONObject) {
+var json []byte = supercereal.Marshal(func(object *supercereal.JSONObject) {
 	object.Put("firstName", "John")
 	object.Put("lastName", "Smith")
 	object.Put("isAlive", true)
@@ -48,8 +41,7 @@ js.Serialize(func(object *supercereal.JSONObject) {
 })
 ```
 #### Efficient
-SuperCereal outperforms Go's `json.Marshal` by ~25x and V8's `JSON.stringify` by ~5x in time:
 ![](benchmark.png)
 
 #### Open
-Licensed Zlib © 2017
+Licensed Zlib © 2017 - 2019

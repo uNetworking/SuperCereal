@@ -5,19 +5,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/alexhultman/SuperCereal/supercereal"
+	"./supercereal"
 )
 
 func benchmarkSuperCerealHighLevel() {
 	var lastJSON []byte
-	js := supercereal.NewJSONStream()
-	js.OnJSON(func(json []byte) {
-		lastJSON = json
-	})
 
 	start := time.Now()
 	for i := 0; i < 1000000; i++ {
-		js.Serialize(func(object *supercereal.JSONObject) {
+		lastJSON = supercereal.Marshal(func(object *supercereal.JSONObject) {
 			object.Put("firstName", "John")
 			object.Put("lastName", "Smith")
 			object.Put("isAlive", true)
@@ -52,7 +48,7 @@ func benchmarkSuperCerealHighLevel() {
 		})
 	}
 
-	fmt.Printf("benchmarkSuperCerealHighLevel took %f µs\n", time.Since(start).Seconds())
+	fmt.Printf("[supercereal.Marshal took %f µs]:\n", time.Since(start).Seconds())
 	fmt.Printf("%s\n\n", string(lastJSON))
 }
 
@@ -179,14 +175,16 @@ func benchmarkJSONMarshal() {
 		})
 	}
 
-	fmt.Printf("benchmarkJSONMarshal took %f µs\n", time.Since(start).Seconds())
+	fmt.Printf("[json.Marshal took %f µs]:\n", time.Since(start).Seconds())
 	fmt.Printf("%s\n\n", string(bytes))
 }
 
 func main() {
-	for i := 0; i < 5; i++ {
+	fmt.Printf("Benchmarking...\n\n")
+
+	//for i := 0; i < 5; i++ {
 		benchmarkSuperCerealHighLevel()
-		benchmarkSuperCerealLowLevel()
-	}
+		//benchmarkSuperCerealLowLevel()
+	//}
 	benchmarkJSONMarshal()
 }
