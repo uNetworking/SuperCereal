@@ -42,6 +42,25 @@ func BenchmarkJSONMarshal(b *testing.B) {
 	}
 }
 
+/* The small struct used in mailru/easyjson benchmarks */
+func BenchmarkAgainstEasyJson(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		supercereal.Marshal(func(object *supercereal.JSONObject) {
+			object.Put("hashtags", func(array *supercereal.JSONArray) {
+				array.Put(func(object *supercereal.JSONObject) {
+					object.Put("indices", func(array *supercereal.JSONArray) {
+						array.Put(5)
+						array.Put(10)
+					})
+					object.Put("text", "some-text")
+				})
+			})
+			object.Put("urls", func(array *supercereal.JSONArray) {})
+			object.Put("user_mentions", func(array *supercereal.JSONArray) {})
+		})
+	}
+}
+
 /* SuperCereal way of doing it */
 func BenchmarkSuperCereal(b *testing.B) {
 	for i := 0; i < b.N; i++ {
