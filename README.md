@@ -11,14 +11,12 @@ var json []byte = supercereal.Marshal(func(object *supercereal.JSONObject) {
 	object.Put("lastName", "Smith")
 	object.Put("isAlive", true)
 	object.Put("age", 25)
-
 	object.Put("address", func(object *supercereal.JSONObject) {
 		object.Put("streetAddress", "21 2nd Street")
 		object.Put("city", "New York")
 		object.Put("state", "NY")
 		object.Put("postalCode", "10021-3100")
 	})
-
 	object.Put("phoneNumbers", func(array *supercereal.JSONArray) {
 		array.Put(func(object *supercereal.JSONObject) {
 			object.Put("type", "home")
@@ -33,10 +31,7 @@ var json []byte = supercereal.Marshal(func(object *supercereal.JSONObject) {
 			object.Put("number", "123 456-7890")
 		})
 	})
-
-	object.Put("children", func(array *supercereal.JSONArray) {
-	})
-
+	object.Put("children", func(array *supercereal.JSONArray) {})
 	object.Put("spouse", nil)
 })
 ```
