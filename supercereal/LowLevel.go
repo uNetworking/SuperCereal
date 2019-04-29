@@ -5,32 +5,31 @@ import (
 )
 
 type JSONStream struct {
-	front  int
 	buffer []byte
-
 	comma bool
 }
 
+func (p *JSONStream) writeArray(b []byte) {
+	p.buffer = append(p.buffer, b...)
+}
+
 func (p *JSONStream) write(b byte) {
-	p.buffer[p.front] = b
-	p.front++
+	p.buffer = append(p.buffer, b)
 }
 
 func (p *JSONStream) reset() {
-	p.front = 0
+	p.buffer = p.buffer[:0]
 	p.comma = false
 }
 
 func NewJSONStream() *JSONStream {
-
-	// cap should be 1 mb by default, reset should not reset it only the length
-	js := &JSONStream{buffer: make([]byte, 1024*1024*10)} // 1mb buffer by default
+	js := &JSONStream{buffer: make([]byte, 0, 1024 * 1024)}
 	js.reset()
 	return js
 }
 
 func (p *JSONStream) end() []byte {
-	return p.buffer[:p.front]
+	return p.buffer
 }
 
 func (p *JSONStream) consumeComma() {
@@ -77,82 +76,58 @@ func (p *JSONStream) PutKey(key []byte) {
 func (p *JSONStream) PutInt(value int) {
 	p.putComma()
 	p.comma = true
-
-	// todo: write
-	byteRep := []byte(fmt.Sprintf("%d", value))
-	copy(p.buffer[p.front:], byteRep)
-	p.front += len(byteRep)
+	p.writeArray([]byte(fmt.Sprintf("%d", value)))
 }
 
 func (p *JSONStream) PutFloat64(value float64) {
 	p.putComma()
 	p.comma = true
-
-	// todo: write
-	byteRep := []byte(fmt.Sprintf("%f", value))
-	copy(p.buffer[p.front:], byteRep)
-	p.front += len(byteRep)
+	p.writeArray([]byte(fmt.Sprintf("%f", value)))
 }
 
 func (p *JSONStream) PutNull() {
 	p.putComma()
 	p.comma = true
-
-	// todo: write
-	byteRep := []byte("null")
-	copy(p.buffer[p.front:], byteRep)
-	p.front += len(byteRep)
+	p.writeArray([]byte("null"))
 }
 
 func (p *JSONStream) PutBoolean(value bool) {
 	p.putComma()
 	p.comma = true
-
-	// todo: write
-	byteRep := "false"
 	if value {
-		byteRep = "true"
+		p.writeArray([]byte("true"))
+	} else {
+		p.writeArray([]byte("false"))
 	}
-	copy(p.buffer[p.front:], byteRep)
-	p.front += len(byteRep)
 }
 
 func (p *JSONStream) escapedCopy(value []byte) {
 	for i := 0; i < len(value); i++ {
 		if value[i] != '\\' && (value[i] > '"' || value[i] == ' ') {
-			p.buffer[p.front] = value[i]
-			p.front++
+			p.write(value[i])
 		} else if value[i] == '"' {
-			p.buffer[p.front] = '\\'
-			p.buffer[p.front+1] = '"'
-			p.front += 2
+			p.write('\\')
+			p.write('"')
 		} else if value[i] == '\\' {
-			p.buffer[p.front] = '\\'
-			p.buffer[p.front+1] = '\\'
-			p.front += 2
+			p.write('\\')
+			p.write('"')
 		} else if value[i] == '\n' {
-			p.buffer[p.front] = '\\'
-			p.buffer[p.front+1] = 'n'
-			p.front += 2
+			p.write('\\')
+			p.write('n')
 		} else if value[i] == '\r' {
-			p.buffer[p.front] = '\\'
-			p.buffer[p.front+1] = 'r'
-			p.front += 2
+			p.write('\\')
+			p.write('r')
 		} else if value[i] == '\t' {
-			p.buffer[p.front] = '\\'
-			p.buffer[p.front+1] = 't'
-			p.front += 2
+			p.write('\\')
+			p.write('t')
 		} else if value[i] == '\f' {
-			p.buffer[p.front] = '\\'
-			p.buffer[p.front+1] = 'f'
-			p.front += 2
+			p.write('\\')
+			p.write('f')
 		} else if value[i] == '\b' {
-			p.buffer[p.front] = '\\'
-			p.buffer[p.front+1] = 'b'
-			p.front += 2
+			p.write('\\')
+			p.write('b')
 		} else {
-			p.buffer[p.front] = value[i]
-			p.front++
+			p.write(value[i])
 		}
 	}
 }

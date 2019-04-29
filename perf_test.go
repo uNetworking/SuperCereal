@@ -6,15 +6,15 @@ import (
 	"testing"
 	"encoding/json"
 	"./supercereal"
-	//"fmt"
+	"fmt"
 )
 
 /* Test emitting Unicode and various escaped chars */
-/*func TestEscaping(t *testing.T) {
+func TestEscaping(t *testing.T) {
 	fmt.Printf("%s\n", string(supercereal.Marshal(func(object *supercereal.Object) {
-		object.Put(`Hallå, this is where we test the so called "Unicode™" 👸👸👸`, `Does it "work"?`)
+		object.Put(`The "princess emoji": 👸👸👸`, `Does it "work"?`)
 	})));
-}*/
+}
 
 /* Standard Golang json.Marshal */
 func BenchmarkJSONMarshal(b *testing.B) {
