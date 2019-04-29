@@ -16,6 +16,42 @@ func TestEscaping(t *testing.T) {
 	})));
 }
 
+/* Standard Golang json.Marshal, but we know the data up front */
+func BenchmarkJSONMarshalPrepared(b *testing.B) {
+	prepared := map[string]interface{}{
+		"firstName": "John",
+		"lastName":  "Smith",
+		"isAlive":   true,
+		"age":       25,
+		"address": map[string]interface{}{
+			"streetAddress": "21 2nd Street",
+			"city":          "New York",
+			"state":         "NY",
+			"postalCode":    "10021-3100",
+		},
+		"phoneNumbers": []interface{}{
+			map[string]interface{}{
+				"type":   "home",
+				"number": "212 555-1234",
+			},
+			map[string]interface{}{
+				"type":   "office",
+				"number": "646 555-4567",
+			},
+			map[string]interface{}{
+				"type":   "mobile",
+				"number": "123 456-7890",
+			},
+		},
+		"children": []interface{}{},
+		"spouse":   nil,
+	}
+
+	for i := 0; i < b.N; i++ {
+		json.Marshal(prepared)
+	}
+}
+
 /* Standard Golang json.Marshal */
 func BenchmarkJSONMarshal(b *testing.B) {
 	for i := 0; i < b.N; i++ {
