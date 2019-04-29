@@ -5,91 +5,91 @@ import (
 )
 
 type JSONStream struct {
-	cb func(json []byte)
-
 	front  int
 	buffer []byte
 
 	comma bool
 }
 
+func (p *JSONStream) write(b byte) {
+	p.buffer[p.front] = b
+	p.front++
+}
+
+func (p *JSONStream) reset() {
+	p.front = 0
+	p.comma = false
+}
+
 func NewJSONStream() *JSONStream {
+
+	// cap should be 1 mb by default, reset should not reset it only the length
 	js := &JSONStream{buffer: make([]byte, 1024*1024*10)} // 1mb buffer by default
-	js.Reset()
+	js.reset()
 	return js
 }
 
-func (p *JSONStream) OnJSON(cb func(json []byte)) {
-	p.cb = cb
+func (p *JSONStream) end() []byte {
+	return p.buffer[:p.front]
 }
 
 func (p *JSONStream) consumeComma() {
 	if p.comma {
-		p.buffer[p.front] = ','
-		p.front++
+		p.write(',')
 		p.comma = false
 	}
 }
 
 func (p *JSONStream) putComma() {
 	if p.comma {
-		p.buffer[p.front] = ','
-		p.front++
+		p.write(',')
 	}
 }
 
 func (p *JSONStream) OpenArray() {
 	p.consumeComma()
-	p.buffer[p.front] = '['
-	p.front++
+	p.write('[')
 }
 
 func (p *JSONStream) OpenObject() {
 	p.consumeComma()
-	p.buffer[p.front] = '{'
-	p.front++
+	p.write('{')
 }
 
 func (p *JSONStream) CloseArray() {
-	p.buffer[p.front] = ']'
-	p.front++
+	p.write(']')
 	p.comma = true
 }
 
 func (p *JSONStream) CloseObject() {
-	p.buffer[p.front] = '}'
-	p.front++
+	p.write('}')
 	p.comma = true
 }
 
 func (p *JSONStream) PutKey(key []byte) {
 	p.consumeComma()
-
-
-	p.buffer[p.front] = '"'
-	p.front++
-
-
-	/*copy(p.buffer[p.front:], key)
-	p.front += len(key)*/
-
+	p.write('"')
 	p.escapedCopy(key);
-
-
-
-	p.buffer[p.front] = '"'
-	p.front++
-
-
-	p.buffer[p.front] = ':'
-	p.front++
+	p.write('"')
+	p.write(':')
 }
 
 func (p *JSONStream) PutInt(value int) {
 	p.putComma()
 	p.comma = true
 
+	// todo: write
 	byteRep := []byte(fmt.Sprintf("%d", value))
+	copy(p.buffer[p.front:], byteRep)
+	p.front += len(byteRep)
+}
+
+func (p *JSONStream) PutFloat64(value float64) {
+	p.putComma()
+	p.comma = true
+
+	// todo: write
+	byteRep := []byte(fmt.Sprintf("%f", value))
 	copy(p.buffer[p.front:], byteRep)
 	p.front += len(byteRep)
 }
@@ -98,6 +98,7 @@ func (p *JSONStream) PutNull() {
 	p.putComma()
 	p.comma = true
 
+	// todo: write
 	byteRep := []byte("null")
 	copy(p.buffer[p.front:], byteRep)
 	p.front += len(byteRep)
@@ -107,6 +108,7 @@ func (p *JSONStream) PutBoolean(value bool) {
 	p.putComma()
 	p.comma = true
 
+	// todo: write
 	byteRep := "false"
 	if value {
 		byteRep = "true"
@@ -158,23 +160,7 @@ func (p *JSONStream) escapedCopy(value []byte) {
 func (p *JSONStream) PutString(value []byte) {
 	p.putComma()
 	p.comma = true
-
-	p.buffer[p.front] = '"'
-	p.front++
-	//copy(p.buffer[p.front:], value)
-	//p.front += len(value)
-
+	p.write('"')
 	p.escapedCopy(value)
-
-	p.buffer[p.front] = '"'
-	p.front++
-}
-
-func (p *JSONStream) Reset() {
-	p.front = 0
-	p.comma = false
-}
-
-func (p *JSONStream) End() {
-	p.cb(p.buffer[:p.front])
+	p.write('"')
 }

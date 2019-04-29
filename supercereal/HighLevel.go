@@ -1,7 +1,7 @@
 package supercereal
 
-type JSONArray JSONStream
-type JSONObject JSONStream
+type Array JSONStream
+type Object JSONStream
 
 func (p *JSONStream) routeValueType(value interface{}) {
 	switch v := value.(type) {
@@ -9,32 +9,28 @@ func (p *JSONStream) routeValueType(value interface{}) {
 		p.PutString([]byte(v))
 	case int:
 		p.PutInt(v)
+	case float64:
+		p.PutFloat64(v)
 	case bool:
 		p.PutBoolean(v)
-	case func(array *JSONArray):
+	case func(array *Array):
 		p.OpenArray()
-		v((*JSONArray)(p))
+		v((*Array)(p))
 		p.CloseArray()
-	case func(object *JSONObject):
+	case func(object *Object):
 		p.OpenObject()
-		v((*JSONObject)(p))
+		v((*Object)(p))
 		p.CloseObject()
 	default:
 		p.PutNull()
 	}
 }
 
-func (p *JSONStream) Serialize(value interface{}) {
-	p.Reset()
-	p.routeValueType(value)
-	p.End()
-}
-
-func (p *JSONArray) Put(value interface{}) {
+func (p *Array) Put(value interface{}) {
 	(*JSONStream)(p).routeValueType(value)
 }
 
-func (p *JSONObject) Put(key string, value interface{}) {
+func (p *Object) Put(key string, value interface{}) {
 	(*JSONStream)(p).PutKey([]byte(key))
 	(*JSONStream)(p).routeValueType(value)
 }
