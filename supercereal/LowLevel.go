@@ -64,12 +64,23 @@ func (p *JSONStream) CloseObject() {
 
 func (p *JSONStream) PutKey(key []byte) {
 	p.consumeComma()
+
+
 	p.buffer[p.front] = '"'
 	p.front++
-	copy(p.buffer[p.front:], key)
-	p.front += len(key)
+
+
+	/*copy(p.buffer[p.front:], key)
+	p.front += len(key)*/
+
+	p.escapedCopy(key);
+
+
+
 	p.buffer[p.front] = '"'
 	p.front++
+
+
 	p.buffer[p.front] = ':'
 	p.front++
 }
@@ -104,15 +115,7 @@ func (p *JSONStream) PutBoolean(value bool) {
 	p.front += len(byteRep)
 }
 
-func (p *JSONStream) PutString(value []byte) {
-	p.putComma()
-	p.comma = true
-
-	p.buffer[p.front] = '"'
-	p.front++
-	//copy(p.buffer[p.front:], value)
-	//p.front += len(value)
-
+func (p *JSONStream) escapedCopy(value []byte) {
 	for i := 0; i < len(value); i++ {
 		if value[i] != '\\' && (value[i] > '"' || value[i] == ' ') {
 			p.buffer[p.front] = value[i]
@@ -150,6 +153,18 @@ func (p *JSONStream) PutString(value []byte) {
 			p.front++
 		}
 	}
+}
+
+func (p *JSONStream) PutString(value []byte) {
+	p.putComma()
+	p.comma = true
+
+	p.buffer[p.front] = '"'
+	p.front++
+	//copy(p.buffer[p.front:], value)
+	//p.front += len(value)
+
+	p.escapedCopy(value)
 
 	p.buffer[p.front] = '"'
 	p.front++
